@@ -16,6 +16,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   double temp = 0;
+  final lightMode = ThemeData.light();
+  final darkMode = ThemeData.dark();
+  bool isDarkMode = true;
 
   @override
   void initState() {
@@ -23,8 +26,23 @@ class _HomeState extends State<Home> {
     getCurrentWeather();
   }
 
+  void setDarkMode() {
+    setState(() {
+      darkMode;
+      isDarkMode = true;
+    });
+    print(isDarkMode);
+  }
+
+  void setLightMode() {
+    setState(() {
+      lightMode;
+      isDarkMode = false;
+    });
+  }
+
   Future<Map<String, dynamic>> getCurrentWeather() async {
-    String cityName = 'Yuma';
+    String cityName = 'Noida';
     String apikey = 'd706b782deca87be0f3ec31e935a21d6';
 
     final res = await http.get(
@@ -42,6 +60,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const Drawer(),
       appBar: AppBar(
         title: const Text(
           'Weather App',
@@ -55,6 +74,12 @@ class _HomeState extends State<Home> {
             icon: const Icon(
               Icons.refresh,
             ),
+          ),
+          IconButton(
+            onPressed: () {
+              isDarkMode ? setLightMode() : setDarkMode();
+            },
+            icon: const Icon(Icons.dark_mode_outlined),
           ),
         ],
       ),

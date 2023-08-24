@@ -21,6 +21,10 @@ class _MyAppState extends State<MyApp> {
   //     theme = 'light';
   //   }
   // }
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
