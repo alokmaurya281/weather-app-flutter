@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:geocode/geocode.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:weather_app/additional_info.dart';
 import 'package:weather_app/houry_forecast_items.dart';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -19,11 +22,28 @@ class _HomeState extends State<Home> {
   final lightMode = ThemeData.light();
   final darkMode = ThemeData.dark();
   bool isDarkMode = true;
+  Position? position;
+  String city = 'New Delhi';
+
+  void getCurrentlocation() async {
+    LocationPermission permission;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    await getCityName();
+    await getCurrentWeather();
+  }
 
   @override
   void initState() {
     super.initState();
-    getCurrentWeather();
+    getCurrentlocation();
   }
 
   void setDarkMode() {
@@ -42,19 +62,33 @@ class _HomeState extends State<Home> {
   }
 
   Future<Map<String, dynamic>> getCurrentWeather() async {
-    String cityName = 'Noida';
     String apikey = 'd706b782deca87be0f3ec31e935a21d6';
 
     final res = await http.get(
       Uri.parse(
-          'https://api.openweathermap.org/data/2.5/forecast?q=$cityName&appid=$apikey'),
+          'https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apikey'),
     );
     // print(res.body);
     final data = jsonDecode(res.body);
+    // print(data);
     if (data['cod'] != '200') {
       throw 'Response Failed with status Code ${data['cod']}';
     }
     return data;
+  }
+
+  Future<void> getCityName() async {
+    try {
+      double lat = position!.latitude;
+      double long = position!.longitude;
+
+      GeoCode geoCode = GeoCode();
+      Address address =
+          await geoCode.reverseGeocoding(latitude: lat, longitude: long);
+      city = address.city!;
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   @override
@@ -127,6 +161,12 @@ class _HomeState extends State<Home> {
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               children: [
+                                Text(
+                                  'City: $city',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
                                 Text(
                                   '${currentTemp.toStringAsPrecision(4)} °C',
                                   style: const TextStyle(

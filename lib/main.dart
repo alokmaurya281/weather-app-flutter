@@ -13,14 +13,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // late String theme = "dark";
-  // void changeTheme() {
-  //   if (theme == 'dark') {
-  //     theme = 'dark';
-  //   } else {
-  //     theme = 'light';
-  //   }
-  // }
+
   @override
   void initState() {
     super.initState();
